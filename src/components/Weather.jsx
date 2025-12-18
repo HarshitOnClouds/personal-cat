@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Cloud, CloudRain, Sun, CloudSnow, Wind } from 'lucide-react';
+import AnimatedCat from './AnimatedCat';
 
 const Weather = () => {
     const [city, setCity] = useState('');
@@ -7,6 +8,16 @@ const Weather = () => {
     const [weather, setWeather] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+
+    // Suggested cities from different climates
+    const suggestedCities = [
+        { name: 'Mumbai', emoji: '🌧️', description: 'Tropical' },
+        { name: 'Moscow', emoji: '❄️', description: 'Cold' },
+        { name: 'Dubai', emoji: '☀️', description: 'Desert' },
+        { name: 'London', emoji: '☁️', description: 'Cloudy' },
+        { name: 'Singapore', emoji: '🌴', description: 'Humid' },
+        { name: 'Reykjavik', emoji: '🌬️', description: 'Windy' }
+    ];
 
     // Initialize with stored city or default to Delhi
     useEffect(() => {
@@ -133,110 +144,149 @@ const Weather = () => {
         }
     };
 
-    // Get cat mood and ASCII art based on weather
+    const handleCityClick = (cityName) => {
+        fetchWeather(cityName);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Get cat mood based on weather and temperature
     const getCatMood = () => {
-        if (!weather) return { mood: 'waiting', cat: '🐱', posture: 'sitting', message: 'Waiting for weather...' };
+        if (!weather) return { mood: 'waiting', posture: 'sitting', message: 'Waiting for weather... 🐱', color: '#6B7280', textColor: 'text-gray-600' };
 
         const weatherMain = weather.weather[0].main.toLowerCase();
         const temp = weather.main.temp;
 
-        if (weatherMain.includes('rain') || weatherMain.includes('drizzle')) {
-            return {
-                mood: 'grumpy',
-                cat: `
-    /\\_/\\  
-   ( o.o ) 
-    > ^ <  
-   /|   |\\
-  (_|___|_)
-        `,
-                posture: 'annoyed',
-                message: "Ugh, it's raining... I hate getting wet!",
-                color: 'text-gray-600'
-            };
-        } else if (weatherMain.includes('thunder') || weatherMain.includes('storm')) {
+        // Temperature-based moods with priority
+        if (temp < -10) {
             return {
                 mood: 'scared',
-                cat: `
-    /\\_/\\  
-   ( >_< ) 
-    > ^ <  
-   /|   |\\
-  (_|___|_)
-        `,
-                posture: 'hiding',
-                message: 'Thunder! I need to hide!',
-                color: 'text-purple-600'
+                posture: 'freezing',
+                message: "Brrrr! It's too cold! Need a warm blanket meow! 🥶",
+                color: '#3B82F6',
+                textColor: 'text-blue-600'
             };
-        } else if (weatherMain.includes('snow')) {
+        } else if (temp >= -10 && temp < 0) {
+            return {
+                mood: 'grumpy',
+                posture: 'cold',
+                message: "So chilly! My paws are freezing... ❄️",
+                color: '#60A5FA',
+                textColor: 'text-blue-400'
+            };
+        } else if (temp >= 0 && temp < 10 && weatherMain.includes('snow')) {
             return {
                 mood: 'curious',
-                cat: `
-    /\\_/\\  
-   ( °.° ) 
-    > ^ <  
-   /|   |\\
-  (_|___|_)
-        `,
                 posture: 'watching',
-                message: 'Ooh, white fluffy things falling!',
-                color: 'text-blue-400'
+                message: 'Ooh, snowy! Can I catch the snowflakes? ⛄',
+                color: '#60A5FA',
+                textColor: 'text-blue-400'
             };
-        } else if (weatherMain.includes('clear') && temp > 25) {
+        } else if (temp >= 0 && temp < 10) {
+            return {
+                mood: 'content',
+                posture: 'cozy',
+                message: "Cool and comfy! Perfect for cuddling by the heater~ 🧣",
+                color: '#8B7355',
+                textColor: 'text-amber-700'
+            };
+        } else if (temp >= 10 && temp < 15) {
+            return {
+                mood: 'happy',
+                posture: 'playful',
+                message: "What a lovely day for playing! Let's go outside! 🌸",
+                color: '#10B981',
+                textColor: 'text-emerald-500'
+            };
+        } else if (temp >= 15 && temp < 20 && weatherMain.includes('rain')) {
+            return {
+                mood: 'grumpy',
+                posture: 'annoyed',
+                message: "Ugh, rain... My fur will get all wet and messy! 💧",
+                color: '#4B5563',
+                textColor: 'text-gray-600'
+            };
+        } else if (temp >= 15 && temp < 20) {
+            return {
+                mood: 'happy',
+                posture: 'playful',
+                message: "Perfect weather! Time for zoomies! 🌈",
+                color: '#16A34A',
+                textColor: 'text-green-600'
+            };
+        } else if (temp >= 20 && temp < 25 && weatherMain.includes('clear')) {
+            return {
+                mood: 'content',
+                posture: 'sunbathing',
+                message: "Ahh~ warm sunshine on my fur feels amazing! ☀️",
+                color: '#F59E0B',
+                textColor: 'text-amber-500'
+            };
+        } else if (temp >= 20 && temp < 25) {
+            return {
+                mood: 'content',
+                posture: 'relaxed',
+                message: "Nice and pleasant! Just purr-fect for lounging~ 😸",
+                color: '#14B8A6',
+                textColor: 'text-teal-500'
+            };
+        } else if (temp >= 25 && temp < 30) {
             return {
                 mood: 'sleepy',
-                cat: `
-    /\\_/\\  
-   ( -.- ) 
-    > ^ <  
-   /|___|\\ 
-  (_______)
-        `,
-                posture: 'napping',
-                message: "It's so warm and sunny... perfect nap weather!",
-                color: 'text-orange-500'
+                posture: 'lazy',
+                message: "Getting warm... Time for a catnap in the shade~ 😴",
+                color: '#F97316',
+                textColor: 'text-orange-500'
+            };
+        } else if (temp >= 30 && temp < 35) {
+            return {
+                mood: 'sleepy',
+                posture: 'sprawled',
+                message: "Too hot to move... Just gonna melt here... 🥵",
+                color: '#EF4444',
+                textColor: 'text-red-500'
+            };
+        } else if (temp >= 35) {
+            return {
+                mood: 'grumpy',
+                posture: 'overheated',
+                message: "WAY TOO HOT! Need AC and ice water NOW! 🔥",
+                color: '#DC2626',
+                textColor: 'text-red-600'
+            };
+        }
+
+        // Weather condition-based moods (fallback)
+        if (weatherMain.includes('thunder') || weatherMain.includes('storm')) {
+            return {
+                mood: 'scared',
+                posture: 'hiding',
+                message: 'Thunder! *hides under bed* Scary noises! ⚡',
+                color: '#7C3AED',
+                textColor: 'text-purple-600'
+            };
+        } else if (weatherMain.includes('mist') || weatherMain.includes('fog')) {
+            return {
+                mood: 'curious',
+                posture: 'exploring',
+                message: 'Misty and mysterious... Perfect for hunting! 🌫️',
+                color: '#9CA3AF',
+                textColor: 'text-gray-400'
             };
         } else if (weatherMain.includes('cloud')) {
             return {
                 mood: 'content',
-                cat: `
-    /\\_/\\  
-   ( ^.^ ) 
-    > ^ <  
-   /|   |\\
-  (_|___|_)
-        `,
-                posture: 'sitting',
-                message: 'Nice and cozy weather for sitting by the window!',
-                color: 'text-gray-500'
-            };
-        } else if (weatherMain.includes('mist') || weatherMain.includes('fog')) {
-            return {
-                mood: 'mysterious',
-                cat: `
-    /\\_/\\  
-   ( -.° ) 
-    > ^ <  
-   /|   |\\
-  (_|___|_)
-        `,
-                posture: 'stalking',
-                message: 'Perfect hunting weather... so mysterious!',
-                color: 'text-gray-400'
+                posture: 'window-watching',
+                message: 'Cloudy day = perfect for bird watching by the window! 🪟',
+                color: '#6B7280',
+                textColor: 'text-gray-500'
             };
         } else {
             return {
                 mood: 'happy',
-                cat: `
-    /\\_/\\  
-   ( ^_^ ) 
-    > ^ <  
-   /|   |\\
-  (_|___|_)
-        `,
-                posture: 'playful',
-                message: "What a lovely day!",
-                color: 'text-green-600'
+                posture: 'cheerful',
+                message: "Life is good! Time to chase my tail! 💕",
+                color: '#16A34A',
+                textColor: 'text-green-600'
             };
         }
     };
@@ -324,32 +374,16 @@ const Weather = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-3 gap-4 text-center">
-                                <div className="bg-blue-50 rounded-lg p-3">
-                                    <div className="text-sm text-gray-600">Humidity</div>
-                                    <div className="text-xl font-semibold text-gray-800">{weather.main.humidity}%</div>
-                                </div>
-                                <div className="bg-blue-50 rounded-lg p-3">
-                                    <div className="text-sm text-gray-600">Wind Speed</div>
-                                    <div className="text-xl font-semibold text-gray-800">{weather.wind.speed} m/s</div>
-                                </div>
-                                <div className="bg-blue-50 rounded-lg p-3">
-                                    <div className="text-sm text-gray-600">Pressure</div>
-                                    <div className="text-xl font-semibold text-gray-800">{weather.main.pressure} hPa</div>
-                                </div>
-                            </div>
                         </div>
 
                         {/* Cat Mood Display */}
-                        <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl p-8 text-center">
+                        <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl p-8 text-center mb-8">
                             <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                                Cat's Mood: <span className={catMood.color}>{catMood.mood}</span>
+                                Cat's Mood: <span className={catMood.textColor}>{catMood.mood}</span>
                             </h3>
 
-                            <div className="bg-gray-50 rounded-xl p-6 mb-4">
-                                <pre className={`text-2xl font-mono ${catMood.color} leading-tight`}>
-                                    {catMood.cat}
-                                </pre>
+                            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 mb-4 flex justify-center">
+                                <AnimatedCat mood={catMood.mood} color={catMood.color} />
                             </div>
 
                             <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg p-4">
@@ -358,8 +392,36 @@ const Weather = () => {
                                 </p>
                             </div>
 
-                            <div className="mt-4 text-sm text-gray-600">
-                                The cat is {catMood.posture} based on the current weather
+                        </div>
+
+                        {/* Suggested Cities */}
+                        <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl p-6">
+                            <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">
+                                🌍 Explore Different Weather & Cat Moods
+                            </h3>
+                            <p className="text-sm text-gray-600 text-center mb-6">
+                                Click on a city to see how the cat reacts to different weather conditions!
+                            </p>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                {suggestedCities.map((suggestedCity) => (
+                                    <button
+                                        key={suggestedCity.name}
+                                        onClick={() => handleCityClick(suggestedCity.name)}
+                                        className={`p-4 rounded-xl transition-all transform hover:scale-105 hover:shadow-lg ${
+                                            city === suggestedCity.name
+                                                ? 'bg-gradient-to-br from-purple-500 to-pink-500 text-white'
+                                                : 'bg-gradient-to-br from-gray-50 to-gray-100 hover:from-purple-50 hover:to-pink-50'
+                                        }`}
+                                    >
+                                        <div className="text-3xl mb-2">{suggestedCity.emoji}</div>
+                                        <div className={`font-semibold ${city === suggestedCity.name ? 'text-white' : 'text-gray-800'}`}>
+                                            {suggestedCity.name}
+                                        </div>
+                                        <div className={`text-xs mt-1 ${city === suggestedCity.name ? 'text-white/80' : 'text-gray-500'}`}>
+                                            {suggestedCity.description}
+                                        </div>
+                                    </button>
+                                ))}
                             </div>
                         </div>
                     </>

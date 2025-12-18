@@ -161,7 +161,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-100 to-pink-100">
+    <div className="flex items-center justify-center min-h-[80vh] bg-gradient-to-br from-purple-100 to-pink-100">
       <div className="text-center">
         <p className="text-4xl font-bold text-purple-800 mb-8">Swipe to pet in the 8 directions</p>
         {audioUnlocked ? null : (
