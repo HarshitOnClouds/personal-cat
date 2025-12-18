@@ -163,8 +163,15 @@ export default function Home() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-100 to-pink-100">
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-purple-800 mb-4">Pet the Cat!</h1>
-        <p className="text-gray-600 mb-8">Swipe/pet in any of the 8 directions</p>
+        <p className="text-4xl font-bold text-purple-800 mb-8">Swipe to pet in the 8 directions</p>
+        {audioUnlocked ? null : (
+          <button
+            onClick={unlockAudio}
+            className="mb-4 px-6 py-3 bg-pink-500 text-white font-semibold rounded-full shadow-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-opacity-75 transition-transform transform hover:scale-105"
+          >
+            Click here to enable sound
+          </button>
+        )}
         
         <div 
           ref={catRef}
@@ -287,7 +294,7 @@ export default function Home() {
         </div>
         
         <div className="mt-8 text-sm text-gray-500">
-          <p>Tap the cat once and then gently pet it to hear different meows!</p>
+          <p>gently pet it hear different meows!</p>
         </div>
       </div>
     </div>

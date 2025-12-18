@@ -1,10 +1,16 @@
 import React from 'react'
 import Home from './components/Home'
+import Weather from './components/Weather'
 
 function App() {
   return (
     <div className='bg-pink-300 h-screen'>
-      <Home />
+      <div>envegwve</div>
+      <div>envegwve</div>
+      <div>envegwve</div>
+      <div>envegwve</div>
+      {/* <Home /> */}
+      <Weather/>
       
     </div>
   )
