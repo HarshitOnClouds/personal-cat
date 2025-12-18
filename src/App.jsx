@@ -17,7 +17,6 @@ function App() {
       {activePage === 'home' && (
         <div>
           <div className=' flex  justify-around'>
-            <div className='px-3 py-2 cursor-pointer hover:bg-pink-400 transition-colors' onClick={() => navhandler('home')}>HOME</div>
             <div className='px-3 py-2 cursor-pointer hover:bg-pink-400 transition-colors' onClick={() => navhandler('weather')}>WEATHER</div>
             <div className='px-3 py-2 cursor-pointer hover:bg-pink-400 transition-colors' onClick={() =>navhandler('story')}>STORY</div>
           </div>
