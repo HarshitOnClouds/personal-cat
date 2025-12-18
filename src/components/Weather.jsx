@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Cloud, CloudRain, Sun, CloudSnow, Wind } from 'lucide-react';
+import { Search, MapPin, Cloud, CloudRain, Sun, CloudSnow, Wind, Home } from 'lucide-react';
 import AnimatedCat from './AnimatedCat';
 
-const Weather = () => {
+const Weather = ({ onNavigateHome }) => {
     const [city, setCity] = useState('');
     const [searchCity, setSearchCity] = useState('');
     const [weather, setWeather] = useState(null);
@@ -314,6 +314,17 @@ const Weather = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 p-8">
             <div className="max-w-2xl mx-auto">
+                {/* Home Button */}
+                {onNavigateHome && (
+                    <button
+                        onClick={onNavigateHome}
+                        className="mb-4 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-lg hover:bg-white transition-all shadow-lg flex items-center gap-2"
+                    >
+                        <Home className="w-5 h-5" />
+                        Home
+                    </button>
+                )}
+                
                 {/* Search Bar */}
                 <form onSubmit={handleSearch} className="mb-8">
                     <div className="flex gap-2">

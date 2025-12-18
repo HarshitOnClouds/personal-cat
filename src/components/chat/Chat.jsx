@@ -4,7 +4,7 @@ import { ChatEngine } from './chatEngine';
 import { analyzeMessage } from './sentimentDetector';
 import './Chat.css';
 
-function Chat() {
+function Chat({ onNavigateHome }) {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -287,7 +287,14 @@ function Chat() {
   return (
     <div className="chat-container">
       <div className="chat-header">
-        <h2>Chat with Cat</h2>
+        <div className="header-top">
+          <h2>Chat with Cat</h2>
+          {onNavigateHome && (
+            <button onClick={onNavigateHome} className="home-button" title="Go to Home">
+              🏠 Home
+            </button>
+          )}
+        </div>
         {stateDisplay && (
           <div className="cat-status">
             <span className="mood-indicator">

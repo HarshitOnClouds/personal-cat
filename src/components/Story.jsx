@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, RotateCcw } from 'lucide-react';
 
-function Story() {
+function Story({ onNavigateHome }) {
     const [currentPanel, setCurrentPanel] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
 
@@ -23,7 +23,9 @@ function Story() {
     };
 
     const handleGoHome = () => {
-        window.location.href = '/';
+        if (onNavigateHome) {
+            onNavigateHome();
+        }
     };
 
     // Zig-zag alternating positions
