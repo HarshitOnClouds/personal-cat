@@ -13,7 +13,37 @@ export const MOODS = {
 
 export class CatState {
   constructor() {
-    this.state = {
+    // Try to load saved state from localStorage
+    const savedState = localStorage.getItem('catapp_state');
+    
+    if (savedState) {
+      try {
+        this.state = JSON.parse(savedState);
+        // Ensure all required properties exist
+        this.state = {
+          mood: this.state.mood || MOODS.CURIOUS,
+          energy: this.state.energy ?? 70,
+          hunger: this.state.hunger ?? 30,
+          trust: this.state.trust ?? 50,
+          lastResponse: this.state.lastResponse || null,
+          lastInteractionTime: this.state.lastInteractionTime || Date.now(),
+          consecutiveIgnores: this.state.consecutiveIgnores || 0,
+          recentResponseIds: this.state.recentResponseIds || []
+        };
+      } catch (error) {
+        console.error('Error loading cat state from localStorage:', error);
+        this.state = this.getDefaultState();
+      }
+    } else {
+      this.state = this.getDefaultState();
+    }
+
+    // Start automatic state evolution
+    this.startStateEvolution();
+  }
+
+  getDefaultState() {
+    return {
       mood: MOODS.CURIOUS,
       energy: 70,        // 0-100
       hunger: 30,        // 0-100
@@ -23,9 +53,6 @@ export class CatState {
       consecutiveIgnores: 0,
       recentResponseIds: [] // Track recent responses for anti-repetition
     };
-
-    // Start automatic state evolution
-    this.startStateEvolution();
   }
 
   getState() {
@@ -35,6 +62,15 @@ export class CatState {
   setState(updates) {
     this.state = { ...this.state, ...updates };
     this.updateMoodBasedOnState();
+    this.saveState();
+  }
+
+  saveState() {
+    try {
+      localStorage.setItem('catapp_state', JSON.stringify(this.state));
+    } catch (error) {
+      console.error('Error saving cat state to localStorage:', error);
+    }
   }
 
   // Update mood based on current state values
@@ -52,6 +88,8 @@ export class CatState {
     } else {
       this.state.mood = MOODS.CURIOUS;
     }
+    
+    this.saveState();
   }
 
   // Record interaction and update trust
@@ -69,6 +107,8 @@ export class CatState {
 
     // Energy decreases with interaction
     this.state.energy = Math.max(0, this.state.energy - 1);
+    
+    this.saveState();
   }
 
   // Record a response to prevent repetition
@@ -80,6 +120,8 @@ export class CatState {
     if (this.state.recentResponseIds.length > 10) {
       this.state.recentResponseIds.shift();
     }
+    
+    this.saveState();
   }
 
   // Check if a response was used recently

@@ -16,6 +16,102 @@ function Chat({ onNavigateHome }) {
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
+  // Generate messages for time user was away
+  const generateMissedMessages = (lastVisit, currentTime) => {
+    const missedMessages = [];
+    const timeDiff = currentTime - lastVisit; // in milliseconds
+    const hoursDiff = timeDiff / (1000 * 60 * 60);
+
+    // Only generate messages if user was away for more than 30 minutes
+    if (hoursDiff < 0.5) return missedMessages;
+
+    const messageTemplates = [
+      { minHours: 0.5, messages: ['*looks around* mew?', '*ears perk* where did you go?', '*sniff sniff* hmm...'] },
+      { minHours: 1, messages: ['*sits by window* waiting...', 'mrrp? *tail swish*', '*stretches* come back soon...'] },
+      { minHours: 2, messages: ['*meows softly* i miss you...', '*curls up* where are youuu? 🥺', '*sad chirp* lonely...'] },
+      { minHours: 4, messages: ['*stares at door* ...waiting...', 'mew mew mew! where ARE you??', '*dramatic sigh* abandoned... 😿'] },
+      { minHours: 8, messages: ['*lies down sadly* have you forgotten me...?', 'i miss you SO much... *whimpers*', '*big sad eyes* please come back...'] },
+      { minHours: 24, messages: ['*rushes to door* YOU\'RE BACK!! I thought you left forever! 😭', 'WHERE HAVE YOU BEEN?! *angry but relieved*', '*tackles you* NEVER leave me that long again!! 💔'] }
+    ];
+
+    // Determine which message sets to use based on hours away
+    const applicableTemplates = messageTemplates.filter(t => hoursDiff >= t.minHours);
+    
+    if (applicableTemplates.length === 0) return missedMessages;
+
+    // Generate 1-4 messages depending on time away
+    let messageCount = Math.min(Math.floor(hoursDiff / 2) + 1, 4);
+    const timeInterval = timeDiff / (messageCount + 1);
+
+    for (let i = 0; i < messageCount; i++) {
+      const templateSet = applicableTemplates[Math.min(i, applicableTemplates.length - 1)];
+      const randomMsg = templateSet.messages[Math.floor(Math.random() * templateSet.messages.length)];
+      const messageTime = new Date(lastVisit.getTime() + (timeInterval * (i + 1)));
+
+      missedMessages.push({
+        id: Date.now() + i,
+        text: randomMsg,
+        sender: 'cat',
+        timestamp: messageTime,
+        isMissed: true
+      });
+    }
+
+    return missedMessages;
+  };
+
+  // Load messages from localStorage on mount and check for missed messages
+  useEffect(() => {
+    const now = new Date();
+    const lastVisitStr = localStorage.getItem('catapp_last_visit');
+    let loadedMessages = [];
+
+    // Load existing messages
+    const savedMessages = localStorage.getItem('catapp_messages');
+    if (savedMessages) {
+      try {
+        const parsedMessages = JSON.parse(savedMessages);
+        loadedMessages = parsedMessages.map(msg => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        }));
+      } catch (error) {
+        console.error('Error loading messages from localStorage:', error);
+      }
+    }
+
+    // Check if user was away and generate missed messages
+    if (lastVisitStr && loadedMessages.length > 0) {
+      const lastVisit = new Date(lastVisitStr);
+      const missedMessages = generateMissedMessages(lastVisit, now);
+      
+      if (missedMessages.length > 0) {
+        // Insert missed messages in chronological order
+        loadedMessages = [...loadedMessages, ...missedMessages].sort(
+          (a, b) => a.timestamp - b.timestamp
+        );
+      }
+    }
+
+    if (loadedMessages.length > 0) {
+      setMessages(loadedMessages);
+    }
+
+    // Update last visit time
+    localStorage.setItem('catapp_last_visit', now.toISOString());
+  }, []);
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    if (messages.length > 0) {
+      try {
+        localStorage.setItem('catapp_messages', JSON.stringify(messages));
+      } catch (error) {
+        console.error('Error saving messages to localStorage:', error);
+      }
+    }
+  }, [messages]);
+
   // Initialize cat state and engine
   useEffect(() => {
     const newCatState = new CatState();
@@ -27,27 +123,28 @@ function Chat({ onNavigateHome }) {
       setStateDisplay(newCatState.getState());
     }, 1000);
 
-    // Add welcome message
-    const welcomeMessages = [
+    // Add welcome message only if no messages exist
+    if (messages.length === 0) {
+      const welcomeMessages = [
       '*stretches* mrrp... hello there! *tail swish*',
       'oh! a human! *perks up* hi hi! \ud83d\ude3a',
       '*yawns* oh hello! *happy chirp* nice to see you!',
       'mew! *runs up excitedly* you are here! prrr!',
       '*slow blinks* hello friend... *purrs* \u2764\ufe0f'
     ];
-    setMessages([{
-      id: Date.now(),
-      text: welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)],
-      sender: 'cat',
-      timestamp: new Date()
-    }]);
+      setMessages([{
+        id: Date.now(),
+        text: welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)],
+        sender: 'cat',
+        timestamp: new Date()
+      }]);
+    }
 
     return () => {
       clearInterval(stateInterval);
       newCatState.destroy();
     };
-  }, []);
-
+  }, [messages.length]);
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -84,6 +181,9 @@ function Chat({ onNavigateHome }) {
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || !chatEngineRef.current) return;
+
+    // Update last visit time on interaction
+    localStorage.setItem('catapp_last_visit', new Date().toISOString());
 
     const userMessage = {
       id: Date.now(),
@@ -194,6 +294,7 @@ function Chat({ onNavigateHome }) {
 
   const handleFeed = () => {
     if (catStateRef.current) {
+      localStorage.setItem('catapp_last_visit', new Date().toISOString());
       catStateRef.current.feed();
       const responses = [
         '*chomps* nom nom nom!',
@@ -215,6 +316,7 @@ function Chat({ onNavigateHome }) {
 
   const handlePet = () => {
     if (catStateRef.current) {
+      localStorage.setItem('catapp_last_visit', new Date().toISOString());
       catStateRef.current.pet();
       const state = catStateRef.current.getState();
       const responses = state.mood === 'annoyed' 
@@ -233,6 +335,7 @@ function Chat({ onNavigateHome }) {
 
   const handlePlay = () => {
     if (catStateRef.current) {
+      localStorage.setItem('catapp_last_visit', new Date().toISOString());
       const state = catStateRef.current.getState();
       if (state.energy < 20) {
         setMessages(prev => [...prev, {
@@ -268,6 +371,7 @@ function Chat({ onNavigateHome }) {
 
   const handleResetMood = () => {
     if (catStateRef.current) {
+      localStorage.setItem('catapp_last_visit', new Date().toISOString());
       catStateRef.current.setState({
         mood: 'affectionate',
         energy: 70,
@@ -281,6 +385,18 @@ function Chat({ onNavigateHome }) {
         timestamp: new Date(),
         isAction: true
       }]);
+    }
+  };
+
+  const handleClearChat = () => {
+    if (window.confirm('Are you sure you want to clear all chat history? This cannot be undone.')) {
+      setMessages([{
+        id: Date.now(),
+        text: '*blinks* oh... fresh start? okay! mew! 😸',
+        sender: 'cat',
+        timestamp: new Date()
+      }]);
+      localStorage.removeItem('catapp_messages');
     }
   };
 
@@ -353,6 +469,9 @@ function Chat({ onNavigateHome }) {
               </button>
               <button onClick={handleResetMood} className="action-btn reset-btn" title="Reset mood">
                 ✨ Reset
+              </button>
+              <button onClick={handleClearChat} className="action-btn clear-btn" title="Clear chat history">
+                🗑️ Clear
               </button>
             </div>
           </div>

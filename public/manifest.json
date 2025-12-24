@@ -1,0 +1,21 @@
+{
+  "name": "Cat Chat App",
+  "short_name": "CatApp",
+  "description": "A delightful Progressive Web App for chatting with a virtual cat",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbbcda",
+  "theme_color": "#fbbcda",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["entertainment", "games"],
+  "screenshots": [],
+  "prefer_related_applications": false
+}
